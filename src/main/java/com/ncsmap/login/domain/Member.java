@@ -2,6 +2,7 @@ package com.ncsmap.login.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Table(name = "member")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class member {
+public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,5 +53,50 @@ public class member {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Builder
+    private Member(String email,
+                   String password,
+                   String name,
+                   String nickname,
+                   Role role,
+                   Provider provider,
+                   String providerId,
+                   String profileImg){
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.nickname = nickname;
+        this.role = role;
+        this.provider = provider;
+        this.providerId = providerId;
+        this.profileImg = profileImg;
+        this.deleted = false;
+    }
 
+    public void updateProfile(String nickname, String profileImg){
+        this.nickname = nickname;
+        this.profileImg = profileImg;
+    }
+
+    public void withdraw(){
+        this.deleted = true;
+    }
+
+    @PrePersist
+    protected void onCreate(){
+        this.createdAt = LocalDateTime.now();
+
+        if(this.role == null){
+            this.role = Role.USER;
+        }
+
+        if(this.provider == null){
+            this.provider = Provider.LOCAL;
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate(){
+        this.updatedAt = LocalDateTime.now();
+    }
 }
