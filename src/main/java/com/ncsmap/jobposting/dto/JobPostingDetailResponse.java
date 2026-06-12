@@ -1,11 +1,9 @@
 package com.ncsmap.jobposting.dto;
 
-import com.ncsmap.institution.entity.Institution;
 import com.ncsmap.jobposting.entity.JobPosting;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
-import org.hibernate.annotations.Comment;
 
 import java.time.LocalDate;
 

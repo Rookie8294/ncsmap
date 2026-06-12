@@ -4,7 +4,6 @@ package com.ncsmap.jobposting.dto;
 import com.ncsmap.jobposting.entity.JobPosting;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDate;
 

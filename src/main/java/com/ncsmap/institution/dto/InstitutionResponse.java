@@ -1,10 +1,8 @@
 package com.ncsmap.institution.dto;
 
 import com.ncsmap.institution.entity.Institution;
-import jakarta.persistence.Column;
 import lombok.Builder;
 import lombok.Getter;
-import org.hibernate.annotations.Comment;
 
 @Getter
 @Builder
