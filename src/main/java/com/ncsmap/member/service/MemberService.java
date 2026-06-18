@@ -4,7 +4,7 @@ import com.ncsmap.member.dto.SignUpRequest;
 
 public interface MemberService {
 
-    Long SignUp(SignUpRequest request);
+    Long signUp(SignUpRequest request);
 
     void validateDuplicateEmail(String email);
 }

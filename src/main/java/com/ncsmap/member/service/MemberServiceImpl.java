@@ -19,7 +19,7 @@ public class MemberServiceImpl implements MemberService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public Long SignUp(SignUpRequest request) {
+    public Long signUp(SignUpRequest request) {
 
         validateDuplicateEmail(request.getEmail());
 
