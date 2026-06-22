@@ -84,7 +84,10 @@ public class Member {
 
     @PrePersist
     protected void onCreate(){
-        this.createdAt = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
+
+        this.createdAt = now;
+        this.updatedAt = now;
 
         if(this.role == null){
             this.role = Role.USER;
