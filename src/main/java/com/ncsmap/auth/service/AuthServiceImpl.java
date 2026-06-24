@@ -4,7 +4,7 @@ import com.ncsmap.auth.dto.LoginRequest;
 import com.ncsmap.auth.security.CustomUserDetails;
 import com.ncsmap.common.exception.BusinessException;
 import com.ncsmap.common.exception.ErrorCode;
-import com.ncsmap.member.domain.Member;
+import com.ncsmap.member.entity.Member;
 import com.ncsmap.member.dto.MemberResponse;
 import com.ncsmap.member.repository.MemberRepository;
 import jakarta.servlet.http.HttpServletRequest;

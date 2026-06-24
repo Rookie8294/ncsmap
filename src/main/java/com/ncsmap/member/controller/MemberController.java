@@ -1,5 +1,7 @@
 package com.ncsmap.member.controller;
 
+import com.ncsmap.common.response.ApiResponse;
+import com.ncsmap.member.dto.MemberResponse;
 import com.ncsmap.member.dto.SignUpRequest;
 import com.ncsmap.member.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,14 +22,23 @@ public class MemberController {
 
     @Operation(summary = "회원가입")
     @PostMapping("/signup")
-    public ResponseEntity<String> signUp(
+    public ResponseEntity<ApiResponse<MemberResponse>> signUp(
             @Valid @RequestBody SignUpRequest request
     ) {
 
-        memberService.signUp(request);
+        MemberResponse response = memberService.signUp(request);
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body("회원가입이 완료되었습니다.");
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "회원가입 성공",
+                        response
+                )
+        );
+    }
+
+    @Operation(summary = "회원 정보 조회")
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<MemberResponse>> getMyInfo() {
+        MemberResponse response = memberService.
     }
 }

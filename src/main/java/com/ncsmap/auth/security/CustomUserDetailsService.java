@@ -2,7 +2,7 @@ package com.ncsmap.auth.security;
 
 import com.ncsmap.common.exception.BusinessException;
 import com.ncsmap.common.exception.ErrorCode;
-import com.ncsmap.member.domain.Member;
+import com.ncsmap.member.entity.Member;
 import com.ncsmap.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package com.ncsmap.member.domain;
+package com.ncsmap.member.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

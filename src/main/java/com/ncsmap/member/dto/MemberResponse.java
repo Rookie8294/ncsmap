@@ -1,6 +1,6 @@
 package com.ncsmap.member.dto;
 
-import com.ncsmap.member.domain.Member;
+import com.ncsmap.member.entity.Member;
 import lombok.Getter;
 
 @Getter

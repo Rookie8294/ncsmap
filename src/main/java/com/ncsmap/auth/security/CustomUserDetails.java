@@ -1,7 +1,7 @@
 package com.ncsmap.auth.security;
 
-import com.ncsmap.member.domain.Member;
-import com.ncsmap.member.domain.Role;
+import com.ncsmap.member.entity.Member;
+import com.ncsmap.member.entity.Role;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
