@@ -74,29 +74,4 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    @Override
-    public MemberResponse getLoginMember() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null ||
-                !authentication.isAuthenticated() ||
-                authentication.getPrincipal().equals("anonymousUser")) {
-
-            log.warn("로그인 사용자 조회 실패 reason=인증 정보 없음");
-            throw new BusinessException(ErrorCode.LOGIN_REQUIRED);
-        }
-
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
-        Member member = memberRepository.findById(userDetails.getMemberId())
-                .orElseThrow(() -> {
-                    log.warn("로그인 사용자 조회 실패 memberId={}", userDetails.getMemberId());
-                    return new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
-                });
-
-        log.info("로그인 사용자 조회 성공 memberId={}", member.getId());
-
-        return new MemberResponse(member);
-
-    }
 }

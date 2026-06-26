@@ -11,5 +11,4 @@ public interface AuthService {
 
     void logout(HttpSession session);
 
-    MemberResponse getLoginMember();
 }
