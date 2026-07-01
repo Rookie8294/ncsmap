@@ -2,6 +2,7 @@ package com.ncsmap.member.service;
 
 import com.ncsmap.member.dto.MemberDetailResponse;
 import com.ncsmap.member.dto.MemberResponse;
+import com.ncsmap.member.dto.MemberUpdateRequest;
 import com.ncsmap.member.dto.SignUpRequest;
 
 public interface MemberService {
@@ -16,7 +17,7 @@ public interface MemberService {
     MemberDetailResponse getMyInfo();
 
     // 회원 정보 수정
-
+    MemberDetailResponse updateMyInfo(MemberUpdateRequest request);
 
     // 회원 탈퇴
 }

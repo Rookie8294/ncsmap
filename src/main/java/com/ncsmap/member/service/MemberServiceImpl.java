@@ -5,6 +5,7 @@ import com.ncsmap.common.exception.BusinessException;
 import com.ncsmap.common.exception.ErrorCode;
 import com.ncsmap.member.dto.MemberDetailResponse;
 import com.ncsmap.member.dto.MemberResponse;
+import com.ncsmap.member.dto.MemberUpdateRequest;
 import com.ncsmap.member.entity.Member;
 import com.ncsmap.member.entity.Provider;
 import com.ncsmap.member.entity.Role;
@@ -82,4 +83,51 @@ public class MemberServiceImpl implements MemberService {
         return new MemberDetailResponse(member);
     }
 
+    @Override
+    public MemberDetailResponse updateMyInfo(MemberUpdateRequest request){
+        Member member = getCurrentMember();
+
+        if(request.getName() != null &&  !request.getName().isBlank()){
+            throw new BusinessException(ErrorCode.INVALID_REQUEST);
+        }
+
+        if(request.getNickname() != null &&  !request.getNickname().isBlank()){
+            throw new BusinessException(ErrorCode.INVALID_REQUEST);
+        }
+
+        if (request.getNickname() != null &&
+                !request.getNickname().equals(member.getNickname()) &&
+                memberRepository.existsByNickname(request.getNickname())) {
+
+            log.warn("회원정보 수정 실패 reason=닉네임 중복 nickname={}", request.getNickname());
+            throw new BusinessException(ErrorCode.DUPLICATE_NICKNAME);
+        }
+
+        member.updateProfile(
+                request.getName(),
+                request.getNickname(),
+                request.getProfileImg()
+        );
+
+        log.info("회원정보 수정 성공 memberId={}", member.getId());
+
+        return new MemberDetailResponse(member);
+    }
+
+    private Member getCurrentMember(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if(authentication == null
+                || !authentication.isAuthenticated()
+                || authentication.getPrincipal().equals("anonymousUser")){
+
+            log.warn("현재 회원 조회 실패 reason = 인증 정보 없음");
+            throw new BusinessException(ErrorCode.LOGIN_REQUIRED);
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+        return  memberRepository.findById(userDetails.getMemberId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+    }
 }

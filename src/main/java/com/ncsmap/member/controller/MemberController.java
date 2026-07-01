@@ -3,6 +3,7 @@ package com.ncsmap.member.controller;
 import com.ncsmap.common.response.ApiResponse;
 import com.ncsmap.member.dto.MemberDetailResponse;
 import com.ncsmap.member.dto.MemberResponse;
+import com.ncsmap.member.dto.MemberUpdateRequest;
 import com.ncsmap.member.dto.SignUpRequest;
 import com.ncsmap.member.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,6 +47,17 @@ public class MemberController {
                         "회원 조회 성공",
                         response
                 )
+        );
+    }
+
+    @Operation(summary = "회원 정보 수정")
+    @PatchMapping("/me")
+    public ResponseEntity<ApiResponse<MemberDetailResponse>> updateMyInfo(
+            @Valid @RequestBody MemberUpdateRequest request){
+        MemberDetailResponse response = memberService.updateMyInfo(request);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("회원정보 수정 성공", response)
         );
     }
 }

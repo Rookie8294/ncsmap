@@ -41,7 +41,7 @@ public class Member {
     @Column(name = "provider_id", length = 255)
     private String providerId;
 
-    @Column(name = "provider_img", length = 200)
+    @Column(name = "provider_img", length = 500)
     private String profileImg;
 
     @Column(name = "is_deleted", nullable = false)
@@ -73,9 +73,20 @@ public class Member {
         this.deleted = false;
     }
 
-    public void updateProfile(String nickname, String profileImg){
-        this.nickname = nickname;
-        this.profileImg = profileImg;
+    public void updateProfile(String name, String nickname, String profileImg){
+        if(name != null){
+            this.name = name;
+        }
+
+        if(nickname != null){
+            this.nickname = nickname;
+        }
+
+        if(profileImg != null){
+            this.profileImg = profileImg;
+        }
+
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void withdraw(){
