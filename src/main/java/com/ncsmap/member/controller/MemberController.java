@@ -10,8 +10,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Member", description = "회원 API")
 @RestController
@@ -51,10 +53,11 @@ public class MemberController {
     }
 
     @Operation(summary = "회원 정보 수정")
-    @PatchMapping("/me")
+    @PatchMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<MemberDetailResponse>> updateMyInfo(
-            @Valid @RequestBody MemberUpdateRequest request){
-        MemberDetailResponse response = memberService.updateMyInfo(request);
+            @ModelAttribute MemberUpdateRequest request,
+            @RequestPart(value = "file", required = false) MultipartFile file){
+        MemberDetailResponse response = memberService.updateMyInfo(request, file);
 
         return ResponseEntity.ok(
                 ApiResponse.success("회원정보 수정 성공", response)

@@ -4,6 +4,7 @@ import com.ncsmap.member.dto.MemberDetailResponse;
 import com.ncsmap.member.dto.MemberResponse;
 import com.ncsmap.member.dto.MemberUpdateRequest;
 import com.ncsmap.member.dto.SignUpRequest;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface MemberService {
 
@@ -17,7 +18,7 @@ public interface MemberService {
     MemberDetailResponse getMyInfo();
 
     // 회원 정보 수정
-    MemberDetailResponse updateMyInfo(MemberUpdateRequest request);
+    MemberDetailResponse updateMyInfo(MemberUpdateRequest request, MultipartFile file);
 
     // 회원 탈퇴
 }

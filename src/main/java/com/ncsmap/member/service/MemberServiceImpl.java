@@ -3,6 +3,8 @@ package com.ncsmap.member.service;
 import com.ncsmap.auth.security.CustomUserDetails;
 import com.ncsmap.common.exception.BusinessException;
 import com.ncsmap.common.exception.ErrorCode;
+import com.ncsmap.common.file.FileStorageService;
+import com.ncsmap.common.file.LocalFileStorageService;
 import com.ncsmap.member.dto.MemberDetailResponse;
 import com.ncsmap.member.dto.MemberResponse;
 import com.ncsmap.member.dto.MemberUpdateRequest;
@@ -19,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +31,8 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final FileStorageService fileStorageService;
+    private final LocalFileStorageService localFileStorageService;
 
     @Operation(summary = "회원가입")
     @Override
@@ -84,29 +89,18 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberDetailResponse updateMyInfo(MemberUpdateRequest request){
+    public MemberDetailResponse updateMyInfo(MemberUpdateRequest request, MultipartFile file) {
         Member member = getCurrentMember();
 
-        if(request.getName() != null &&  !request.getName().isBlank()){
-            throw new BusinessException(ErrorCode.INVALID_REQUEST);
-        }
+        validateUpdateRequest(request);
+        validateDuplicateNickname(member, request.getNickname());
 
-        if(request.getNickname() != null &&  !request.getNickname().isBlank()){
-            throw new BusinessException(ErrorCode.INVALID_REQUEST);
-        }
-
-        if (request.getNickname() != null &&
-                !request.getNickname().equals(member.getNickname()) &&
-                memberRepository.existsByNickname(request.getNickname())) {
-
-            log.warn("회원정보 수정 실패 reason=닉네임 중복 nickname={}", request.getNickname());
-            throw new BusinessException(ErrorCode.DUPLICATE_NICKNAME);
-        }
+        String profileImg = uploadProfileImageIfExists(member.getId(),file);
 
         member.updateProfile(
                 request.getName(),
                 request.getNickname(),
-                request.getProfileImg()
+                profileImg
         );
 
         log.info("회원정보 수정 성공 memberId={}", member.getId());
@@ -129,5 +123,93 @@ public class MemberServiceImpl implements MemberService {
 
         return  memberRepository.findById(userDetails.getMemberId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+    }
+
+    private void validateUpdateRequest(MemberUpdateRequest request) {
+
+        log.debug("회원정보 수정 요청값 검증 시작");
+
+        if (request.getName() != null && request.getName().isBlank()) {
+
+            log.warn("회원정보 수정 실패 reason=이름 공백");
+
+            throw new BusinessException(ErrorCode.INVALID_REQUEST);
+        }
+
+        if (request.getNickname() != null && request.getNickname().isBlank()) {
+
+            log.warn("회원정보 수정 실패 reason=닉네임 공백");
+
+            throw new BusinessException(ErrorCode.INVALID_REQUEST);
+        }
+
+        log.debug("회원정보 수정 요청값 검증 완료");
+    }
+
+    private void validateDuplicateNickname(Member member, String nickname) {
+
+        if (nickname == null) {
+            log.debug("닉네임 변경 없음 memberId={}", member.getId());
+            return;
+        }
+
+        if (nickname.equals(member.getNickname())) {
+            log.debug("닉네임 동일 memberId={}, nickname={}",
+                    member.getId(),
+                    nickname);
+            return;
+        }
+
+        log.info(
+                "닉네임 중복 검사 시작 memberId={}, currentNickname={}, requestNickname={}",
+                member.getId(),
+                member.getNickname(),
+                nickname
+        );
+
+        if (memberRepository.existsByNickname(nickname)) {
+
+            log.warn(
+                    "닉네임 중복 검사 실패 memberId={}, duplicateNickname={}",
+                    member.getId(),
+                    nickname
+            );
+
+            throw new BusinessException(ErrorCode.DUPLICATE_NICKNAME);
+        }
+
+        log.info(
+                "닉네임 중복 검사 완료 memberId={}, nickname={}",
+                member.getId(),
+                nickname
+        );
+    }
+
+    private String uploadProfileImageIfExists(Long memberId, MultipartFile file) {
+
+        if (file == null || file.isEmpty()) {
+
+            log.debug("프로필 이미지 변경 없음 memberId={}", memberId);
+
+            return null;
+        }
+
+        log.info(
+                "프로필 이미지 업로드 시작 memberId={}, originalFilename={}, contentType={}, size={}bytes",
+                memberId,
+                file.getOriginalFilename(),
+                file.getContentType(),
+                file.getSize()
+        );
+
+        String imageUrl = localFileStorageService.storageProfileImage(file);
+
+        log.info(
+                "프로필 이미지 업로드 완료 memberId={}, imageUrl={}",
+                memberId,
+                imageUrl
+        );
+
+        return imageUrl;
     }
 }
