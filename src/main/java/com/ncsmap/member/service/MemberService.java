@@ -21,4 +21,5 @@ public interface MemberService {
     MemberDetailResponse updateMyInfo(MemberUpdateRequest request, MultipartFile file);
 
     // 회원 탈퇴
+    void withdraw(Long memberId);
 }

@@ -90,7 +90,10 @@ public class Member {
     }
 
     public void withdraw(){
+        LocalDateTime now = LocalDateTime.now();
+
         this.deleted = true;
+        this.updatedAt = now;
     }
 
     @PrePersist

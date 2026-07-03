@@ -23,7 +23,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         log.info("회원 인증 정보 조회 email = {}", email);
 
-        Member member = memberRepository.findByEmail(email)
+        Member member = memberRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> {
                     log.warn("화원 인증 정보 조회 실패 email = {}", email);
                     return new BusinessException(ErrorCode.MEMBER_NOT_FOUND);

@@ -34,7 +34,6 @@ public class MemberServiceImpl implements MemberService {
     private final FileStorageService fileStorageService;
     private final LocalFileStorageService localFileStorageService;
 
-    @Operation(summary = "회원가입")
     @Override
     public MemberResponse signUp(SignUpRequest request) {
 
@@ -57,12 +56,11 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public void validateDuplicateEmail(String email) {
 
-        if(memberRepository.existsByEmail(email)){
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        if (memberRepository.existsByEmailAndDeletedFalse(email)) {
+            throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
         }
     }
 
-    @Operation(summary = "회원 조회")
     @Override
     public MemberDetailResponse getMyInfo(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -92,6 +90,8 @@ public class MemberServiceImpl implements MemberService {
     public MemberDetailResponse updateMyInfo(MemberUpdateRequest request, MultipartFile file) {
         Member member = getCurrentMember();
 
+        log.info("요청 정보 name={}, nickname={}", request.getName(), request.getNickname());
+
         validateUpdateRequest(request);
         validateDuplicateNickname(member, request.getNickname());
 
@@ -106,6 +106,18 @@ public class MemberServiceImpl implements MemberService {
         log.info("회원정보 수정 성공 memberId={}", member.getId());
 
         return new MemberDetailResponse(member);
+    }
+
+    @Override
+    public void withdraw(Long memberId){
+        log.info("회원 탈퇴 요청 memberId={}", memberId);
+
+        Member member = memberRepository.findByIdAndDeletedFalse(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+
+        member.withdraw();
+
+        log.info("회원 탈퇴 성공 memberId={}", memberId);
     }
 
     private Member getCurrentMember(){
