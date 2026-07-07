@@ -1,6 +1,6 @@
 package com.ncsmap.member.service;
 
-import com.ncsmap.auth.security.CustomUserDetails;
+import com.ncsmap.auth.security.LoginUser;
 import com.ncsmap.common.exception.BusinessException;
 import com.ncsmap.common.exception.ErrorCode;
 import com.ncsmap.common.file.FileStorageService;
@@ -13,7 +13,6 @@ import com.ncsmap.member.entity.Provider;
 import com.ncsmap.member.entity.Role;
 import com.ncsmap.member.dto.SignUpRequest;
 import com.ncsmap.member.repository.MemberRepository;
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -62,22 +61,10 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberDetailResponse getMyInfo(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null ||
-                !authentication.isAuthenticated() ||
-                authentication.getPrincipal().equals("anonymousUser")) {
-
-            log.warn("로그인 사용자 조회 실패 reason=인증 정보 없음");
-            throw new BusinessException(ErrorCode.LOGIN_REQUIRED);
-        }
-
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
-        Member member = memberRepository.findById(userDetails.getMemberId())
+    public MemberDetailResponse getMyInfo(Long memberId){
+        Member member = memberRepository.findByIdAndDeletedFalse(memberId)
                 .orElseThrow(() -> {
-                    log.warn("로그인 사용자 조회 실패 memberId={}", userDetails.getMemberId());
+                    log.warn("로그인 사용자 조회 실패 memberId={}", memberId);
                     return new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
                 });
 
@@ -131,9 +118,9 @@ public class MemberServiceImpl implements MemberService {
             throw new BusinessException(ErrorCode.LOGIN_REQUIRED);
         }
 
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        LoginUser loginUser = (LoginUser) authentication.getPrincipal();
 
-        return  memberRepository.findById(userDetails.getMemberId())
+        return  memberRepository.findById(loginUser.getMemberId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
     }
 

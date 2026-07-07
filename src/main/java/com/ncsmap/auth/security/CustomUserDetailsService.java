@@ -6,14 +6,19 @@ import com.ncsmap.member.entity.Member;
 import com.ncsmap.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final MemberRepository  memberRepository;
@@ -31,6 +36,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         log.info("화원 인증 정보 조회 성공 memberId = {}", member.getId());
 
-        return new CustomUserDetails(member);
+        return LoginUser.from(
+                member,
+                List.of(new SimpleGrantedAuthority(member.getRole().name()))
+        );
     }
 }

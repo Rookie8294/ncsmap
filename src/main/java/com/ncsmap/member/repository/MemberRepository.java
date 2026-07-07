@@ -20,5 +20,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByEmailAndDeletedFalse(String email);
 
+    Optional<Member> findByProviderAndProviderIdAndDeletedFalse(
+            Provider provider,
+            String providerId
+    );
+
     Optional<Member> findByProviderAndProviderId(Provider provider, String providerId);
 }

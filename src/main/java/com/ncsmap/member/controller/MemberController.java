@@ -1,6 +1,8 @@
 package com.ncsmap.member.controller;
 
-import com.ncsmap.auth.security.CustomUserDetails;
+import com.ncsmap.auth.security.LoginUser;
+import com.ncsmap.common.exception.BusinessException;
+import com.ncsmap.common.exception.ErrorCode;
 import com.ncsmap.common.response.ApiResponse;
 import com.ncsmap.member.dto.MemberDetailResponse;
 import com.ncsmap.member.dto.MemberResponse;
@@ -46,14 +48,16 @@ public class MemberController {
 
     @Operation(summary = "회원 정보 조회")
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<MemberDetailResponse>> getMyInfo() {
-        MemberDetailResponse response = memberService.getMyInfo();
+    public ResponseEntity<ApiResponse<MemberDetailResponse>> getMyInfo(
+            @AuthenticationPrincipal LoginUser loginUser) {
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.LOGIN_REQUIRED);
+        }
+
+        MemberDetailResponse response = memberService.getMyInfo(loginUser.getMemberId());
 
         return ResponseEntity.ok(
-                ApiResponse.success(
-                        "회원 조회 성공",
-                        response
-                )
+                ApiResponse.success("회원 정보 조회 성공", response)
         );
     }
 
@@ -72,10 +76,10 @@ public class MemberController {
     @Operation(summary = "회원 탈퇴")
     @DeleteMapping("/me")
     public ResponseEntity<ApiResponse<Void>> withdraw(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @AuthenticationPrincipal LoginUser loginUser,
             HttpServletRequest request
     ) {
-        memberService.withdraw(userDetails.getMemberId());
+        memberService.withdraw(loginUser.getMemberId());
 
         request.getSession().invalidate();
 

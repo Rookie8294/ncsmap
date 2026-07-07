@@ -15,7 +15,7 @@ public interface MemberService {
     void validateDuplicateEmail(String email);
 
     // 회원 조회
-    MemberDetailResponse getMyInfo();
+    MemberDetailResponse getMyInfo(Long memberId);
 
     // 회원 정보 수정
     MemberDetailResponse updateMyInfo(MemberUpdateRequest request, MultipartFile file);
