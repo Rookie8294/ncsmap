@@ -1,11 +1,9 @@
 package com.ncsmap.auth.service;
 
 import com.ncsmap.auth.dto.LoginRequest;
-import com.ncsmap.auth.security.CustomUserDetails;
+import com.ncsmap.auth.security.LoginUser;
 import com.ncsmap.common.exception.BusinessException;
 import com.ncsmap.common.exception.ErrorCode;
-import com.ncsmap.member.domain.Member;
-import com.ncsmap.member.dto.MemberResponse;
 import com.ncsmap.member.repository.MemberRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -51,11 +49,11 @@ public class AuthServiceImpl implements AuthService {
                     securityContext
             );
 
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            LoginUser loginUser = (LoginUser) authentication.getPrincipal();
 
-            log.info("로그인 성공 memberId={}, email={}", userDetails.getMemberId(),  userDetails.getEmail());
+            log.info("로그인 성공 memberId={}, email={}", loginUser.getMemberId(),  loginUser.getEmail());
 
-            return userDetails.getMemberId();
+            return loginUser.getMemberId();
         } catch (Exception e) {
             log.warn("로그인 실패 email={}, reason=잘못된 인증 정보", request.getEmail());
             throw new BusinessException(ErrorCode.INVALID_EMAIL_OR_PASSWORD);
@@ -74,29 +72,4 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    @Override
-    public MemberResponse getLoginMember() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null ||
-                !authentication.isAuthenticated() ||
-                authentication.getPrincipal().equals("anonymousUser")) {
-
-            log.warn("로그인 사용자 조회 실패 reason=인증 정보 없음");
-            throw new BusinessException(ErrorCode.LOGIN_REQUIRED);
-        }
-
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
-        Member member = memberRepository.findById(userDetails.getMemberId())
-                .orElseThrow(() -> {
-                    log.warn("로그인 사용자 조회 실패 memberId={}", userDetails.getMemberId());
-                    return new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
-                });
-
-        log.info("로그인 사용자 조회 성공 memberId={}", member.getId());
-
-        return new MemberResponse(member);
-
-    }
 }

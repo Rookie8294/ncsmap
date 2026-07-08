@@ -48,17 +48,4 @@ public class AuthController {
         );
     }
 
-    @Operation(summary = "로그인 상태 확인")
-    @GetMapping("/me")
-    public ResponseEntity<ApiResponse<MemberResponse>> me() {
-        MemberResponse response = authService.getLoginMember();
-
-        return ResponseEntity.ok(
-                ApiResponse.success(
-                        "회원 조회 성공",
-                        response
-                )
-        );
-    }
-
 }

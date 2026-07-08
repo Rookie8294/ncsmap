@@ -1,7 +1,7 @@
 package com.ncsmap.member.repository;
 
-import com.ncsmap.member.domain.Member;
-import com.ncsmap.member.domain.Provider;
+import com.ncsmap.member.entity.Member;
+import com.ncsmap.member.entity.Provider;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
@@ -11,6 +11,19 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    boolean existsByNickname(String nickname);
+
+    boolean existsByEmailAndDeletedFalse(String email);
+
+    Optional<Member> findByIdAndDeletedFalse(Long id);
+
+    Optional<Member> findByEmailAndDeletedFalse(String email);
+
+    Optional<Member> findByProviderAndProviderIdAndDeletedFalse(
+            Provider provider,
+            String providerId
+    );
 
     Optional<Member> findByProviderAndProviderId(Provider provider, String providerId);
 }

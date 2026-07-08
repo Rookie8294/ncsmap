@@ -1,4 +1,4 @@
-package com.ncsmap.member.domain;
+package com.ncsmap.member.entity;
 
 public enum Provider {
     LOCAL, KAKAO, NAVER, GOOGLE
