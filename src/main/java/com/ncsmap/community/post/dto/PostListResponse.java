@@ -1,6 +1,6 @@
 package com.ncsmap.community.post.dto;
 
-import com.ncsmap.community.post.entity.PostCategory;
+import com.ncsmap.community.post.entity.BoardType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -15,7 +15,7 @@ public class PostListResponse {
     private Long memberId;
     private String memberNickname;
 
-    private PostCategory category;
+    private BoardType boardType;
     private String title;
 
     private int viewCount;

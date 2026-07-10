@@ -1,7 +1,7 @@
 package com.ncsmap.community.post.dto;
 
 import com.ncsmap.community.post.entity.Post;
-import com.ncsmap.community.post.entity.PostCategory;
+import com.ncsmap.community.post.entity.BoardType;
 import com.ncsmap.community.post.entity.PostStatus;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,7 +23,7 @@ public class PostResponse {
     private Long institutionId;
     private String institutionName;
 
-    private PostCategory category;
+    private BoardType boardType;
     private String title;
     private String content;
 
@@ -44,7 +44,7 @@ public class PostResponse {
                 .jobPostingTitle(post.getJobPosting() != null ? post.getJobPosting().getTitle() : null)
                 .institutionId(post.getInstitution() != null ? post.getInstitution().getId() : null)
                 .institutionName(post.getInstitution() != null ? post.getInstitution().getName() : null)
-                .category(post.getCategory())
+                .boardType(post.getBoardType())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .viewCount(post.getViewCount())

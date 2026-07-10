@@ -1,8 +1,8 @@
 package com.ncsmap.community.post.entity;
 
-public enum PostCategory {
+public enum BoardType {
     FREE,
-    REVIEW,
     STUDY,
-    QUESTION
+    JOB_POSTING,
+    INSTITUTION
 }

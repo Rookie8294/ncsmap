@@ -13,7 +13,7 @@ public interface PostService {
     PostResponse createPost(PostCreateRequest postCreateRequest);
 
     // 게시글 목록 조회
-    List<PostResponse> getPosts();
+    List<PostResponse> getPostList();
 
     // 게시글 상세 조회
     PostResponse getPost(Long postId);

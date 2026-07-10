@@ -16,11 +16,22 @@ import java.time.LocalDateTime;
 @Table(
         name = "post",
         indexes = {
-                @Index(name = "idx_post_member", columnList = "member_id"),
-                @Index(name = "idx_post_institution", columnList = "institution_id"),
-                @Index(name = "idx_post_job_posting", columnList = "job_posting_id"),
-                @Index(name = "idx_post_category", columnList = "category_id"),
-                @Index(name = "idx_post_created_at", columnList = "created_at")
+                @Index(
+                        name = "idx_post_board_type_status_created_at",
+                        columnList = "board_type, status, created_at"
+                ),
+                @Index(
+                        name = "idx_post_member_status_created_at",
+                        columnList = "member_id, status, created_at"
+                ),
+                @Index(
+                        name = "idx_post_job_posting_status_created_at",
+                        columnList = "job_posting_id, status, created_at"
+                ),
+                @Index(
+                        name = "idx_post_institution_status_created_at",
+                        columnList = "institution_id, status, created_at"
+                )
         }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -48,9 +59,9 @@ public class Post {
     private Institution institution;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
-    @Comment("게시글 카테고리")
-    private PostCategory category;
+    @Column(name = "board_type", nullable = false, length = 30)
+    @Comment("게시판 유형")
+    private BoardType boardType;
 
     @Column(nullable = false, length = 200)
     @Comment("게시글 제목")
@@ -82,17 +93,20 @@ public class Post {
     @Comment("수정일시")
     private LocalDateTime updatedAt;
 
-    private Post(Member member,
-                 JobPosting jobPosting,
-                 Institution institution,
-                 PostCategory category,
-                 String title,
-                 String content) {
+    private Post(
+            Member member,
+            JobPosting jobPosting,
+            Institution institution,
+            BoardType boardType,
+            String title,
+            String content
+    ) {
+        validateBoardRelation(boardType, jobPosting, institution);
 
         this.member = member;
         this.jobPosting = jobPosting;
         this.institution = institution;
-        this.category = category;
+        this.boardType = boardType;
         this.title = title;
         this.content = content;
         this.viewCount = 0;
@@ -101,53 +115,124 @@ public class Post {
         this.createdAt = LocalDateTime.now();
     }
 
-    // 게시글 생성
-    public static Post createPost(Member member,
-                                  JobPosting jobPosting,
-                                  Institution institution,
-                                  PostCategory category,
-                                  String title,
-                                  String content) {
-
+    /**
+     * 게시글을 생성한다.
+     */
+    public static Post createPost(
+            Member member,
+            JobPosting jobPosting,
+            Institution institution,
+            BoardType boardType,
+            String title,
+            String content
+    ) {
         return new Post(
                 member,
                 jobPosting,
                 institution,
-                category,
+                boardType,
                 title,
                 content
         );
     }
 
-    // 게시글 수정
-    public void update(PostCategory category,
-                       String title,
-                       String content) {
+    /**
+     * 게시글의 게시판 유형, 제목, 내용을 수정한다.
+     */
+    public void update(
+            BoardType boardType,
+            JobPosting jobPosting,
+            Institution institution,
+            String title,
+            String content
+    ) {
+        validateBoardRelation(boardType, jobPosting, institution);
 
-        this.category = category;
+        this.boardType = boardType;
+        this.jobPosting = jobPosting;
+        this.institution = institution;
         this.title = title;
         this.content = content;
         this.updatedAt = LocalDateTime.now();
     }
 
-    // 조회수 증가
+    /**
+     * 게시판 유형과 연결 대상의 조합이 올바른지 검증한다.
+     */
+    private static void validateBoardRelation(
+            BoardType boardType,
+            JobPosting jobPosting,
+            Institution institution
+    ) {
+        if (boardType == null) {
+            throw new IllegalArgumentException("게시판 유형은 필수입니다.");
+        }
+
+        switch (boardType) {
+            case FREE, STUDY -> {
+                if (jobPosting != null || institution != null) {
+                    throw new IllegalArgumentException(
+                            "자유게시판과 스터디 게시판은 채용공고 또는 기관을 연결할 수 없습니다."
+                    );
+                }
+            }
+
+            case JOB_POSTING -> {
+                if (jobPosting == null) {
+                    throw new IllegalArgumentException(
+                            "채용공고 게시판은 채용공고가 필수입니다."
+                    );
+                }
+
+                if (institution != null) {
+                    throw new IllegalArgumentException(
+                            "채용공고 게시판에는 기관을 직접 연결할 수 없습니다."
+                    );
+                }
+            }
+
+            case INSTITUTION -> {
+                if (institution == null) {
+                    throw new IllegalArgumentException(
+                            "기관 게시판은 기관이 필수입니다."
+                    );
+                }
+
+                if (jobPosting != null) {
+                    throw new IllegalArgumentException(
+                            "기관 게시판에는 채용공고를 연결할 수 없습니다."
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * 조회수를 증가시킨다.
+     */
     public void increaseViewCount() {
         this.viewCount++;
     }
 
-    // 좋아요 증가
+    /**
+     * 좋아요 수를 증가시킨다.
+     */
     public void increaseLikeCount() {
         this.likeCount++;
     }
 
-    // 좋아요 감소
+    /**
+     * 좋아요 수를 감소시킨다.
+     */
     public void decreaseLikeCount() {
         if (this.likeCount > 0) {
             this.likeCount--;
         }
     }
 
-    // 게시글 삭제
+    /**
+     * 게시글을 삭제 상태로 변경한다.
+     */
     public void delete() {
         this.status = PostStatus.DELETED;
         this.updatedAt = LocalDateTime.now();

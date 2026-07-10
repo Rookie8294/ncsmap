@@ -1,9 +1,8 @@
 package com.ncsmap.community.post.dto;
 
-import com.ncsmap.community.post.entity.PostCategory;
+import com.ncsmap.community.post.entity.BoardType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -12,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class PostCreateRequest {
 
     @NotNull(message = "카테고리는 필수입니다.")
-    private PostCategory category;
+    private BoardType boardType;
 
     private Long jobPostingId;
 

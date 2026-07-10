@@ -1,7 +1,7 @@
 package com.ncsmap.community.post.dto;
 
 import com.ncsmap.community.post.entity.Post;
-import com.ncsmap.community.post.entity.PostCategory;
+import com.ncsmap.community.post.entity.BoardType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -11,8 +11,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PostUpdateRequest {
 
-    @NotNull(message = "카테고리는 필수입니다.")
-    private PostCategory category;
+    @NotNull(message = "게시판 유형은 필수입니다.")
+    private BoardType boardType;
+
+    private Long jobPostingId;
+
+    private Long institutionId;
 
     @NotBlank(message = "제목은 필수입니다.")
     private String title;
@@ -25,7 +29,7 @@ public class PostUpdateRequest {
                 .id(post.getId())
                 .memberId(post.getMember().getId())
                 .memberNickname(post.getMember().getNickname())
-                .category(post.getCategory())
+                .boardType(post.getBoardType())
                 .title(post.getTitle())
                 .viewCount(post.getViewCount())
                 .likeCount(post.getLikeCount())

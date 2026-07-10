@@ -1,7 +1,7 @@
 package com.ncsmap.community.post.repository;
 
 import com.ncsmap.community.post.entity.Post;
-import com.ncsmap.community.post.entity.PostCategory;
+import com.ncsmap.community.post.entity.BoardType;
 import com.ncsmap.community.post.entity.PostStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -17,7 +17,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findAllByStatusOrderByCreatedAtDesc(PostStatus status);
 
     // 카테고리별 게시글 목록 최신순 조회
-    List<Post> findAllByCategoryAndStatusOrderByCreatedAtDesc(PostCategory category, PostStatus status);
+    List<Post> findAllByCategoryAndStatusOrderByCreatedAtDesc(BoardType category, PostStatus status);
 
     // 특정 회원이 작성한 게시글 목록 최신순 조회
     List<Post> findAllByMemberIdAndStatusOrderByCreatedAtDesc(Long memberId, PostStatus status);
