@@ -2,15 +2,15 @@ package com.ncsmap.institution.entity;
 
 import com.ncsmap.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.Comment;
 
 @Entity
 @Table(name = "institution")
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Institution extends BaseEntity {
 
     @Id
@@ -35,11 +35,22 @@ public class Institution extends BaseEntity {
 
     @Comment("도로명 주소")
     @Column(length = 200)
-    private String loadAddress;
+    private String roadAddress;
 
     @Comment("기관 사이트 주소")
     @Column(length = 300)
     private String siteUrl;
 
+
+    public void update(
+            String name, String type, String ministry,
+            String roadAddress, String siteUrl
+    ) {
+        this.name = name;
+        this.type = type;
+        this.ministry = ministry;
+        this.roadAddress = roadAddress;
+        this.siteUrl = siteUrl;
+    }
 
 }
