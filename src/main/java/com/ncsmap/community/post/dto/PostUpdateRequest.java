@@ -26,7 +26,7 @@ public class PostUpdateRequest {
 
     public static PostListResponse from(Post post) {
         return PostListResponse.builder()
-                .id(post.getId())
+                .postId(post.getId())
                 .memberId(post.getMember().getId())
                 .memberNickname(post.getMember().getNickname())
                 .boardType(post.getBoardType())
