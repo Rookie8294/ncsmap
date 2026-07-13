@@ -24,7 +24,7 @@ public class InstitutionResponse {
                 .type(institution.getType())
                 .code(institution.getCode())
                 .ministry(institution.getMinistry())
-                .loadAddress(institution.getLoadAddress())
+                .loadAddress(institution.getRoadAddress())
                 .siteUrl(institution.getSiteUrl())
                 .build();
     }

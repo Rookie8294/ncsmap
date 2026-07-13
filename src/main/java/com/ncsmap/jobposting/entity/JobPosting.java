@@ -3,15 +3,15 @@ package com.ncsmap.jobposting.entity;
 import com.ncsmap.common.BaseEntity;
 import com.ncsmap.institution.entity.Institution;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.Comment;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "job_posting")
 @Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class JobPosting extends BaseEntity {
 
@@ -99,5 +99,32 @@ public class JobPosting extends BaseEntity {
     @Comment("우대사항 요약")
     @Column(length = 500)
     private String preferCondition;
+
+    public void update(String title, String hireType, String recruitType,
+                       String eduReq, String workRegion, Integer recruitCount,
+                       LocalDate startDate, LocalDate endDate,
+                       Boolean ncsYn, String ncsCodes, String ncsCodeNames,
+                       String status, String sourceUrl,
+                       String applyQualification, String disqualifyReason,
+                       String processDesc, String preferential, String preferCondition) {
+        this.title = title;
+        this.hireType = hireType;
+        this.recruitType = recruitType;
+        this.eduReq = eduReq;
+        this.workRegion = workRegion;
+        this.recruitCount = recruitCount;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.ncsYn = ncsYn;
+        this.ncsCodes = ncsCodes;
+        this.ncsCodeNames = ncsCodeNames;
+        this.status = status;
+        this.sourceUrl = sourceUrl;
+        this.applyQualification = applyQualification;
+        this.disqualifyReason = disqualifyReason;
+        this.processDesc = processDesc;
+        this.preferential = preferential;
+        this.preferCondition = preferCondition;
+    }
 
 }
