@@ -3,9 +3,7 @@ package com.ncsmap.community.post.service;
 import com.ncsmap.common.exception.BusinessException;
 import com.ncsmap.common.exception.ErrorCode;
 import com.ncsmap.common.util.SecurityUtil;
-import com.ncsmap.community.post.dto.PostCreateRequest;
-import com.ncsmap.community.post.dto.PostResponse;
-import com.ncsmap.community.post.dto.PostUpdateRequest;
+import com.ncsmap.community.post.dto.*;
 import com.ncsmap.community.post.entity.BoardType;
 import com.ncsmap.community.post.entity.Post;
 import com.ncsmap.community.post.entity.PostStatus;
@@ -18,6 +16,8 @@ import com.ncsmap.member.entity.Member;
 import com.ncsmap.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,21 +77,32 @@ public class PostServiceImpl implements PostService {
         return PostResponse.from(savedPost);
     }
 
-    /**
-     * 게시글 목록을 최신순으로 조회한다.
-     */
+    // 전체 또는 조건을 이용한 게시물 조회
     @Override
-    public List<PostResponse> getPostList() {
-        log.info("게시글 목록 조회 요청");
+    public Page<PostListResponse> getPostList(
+            PostSearchCondition condition,
+            Pageable pageable
+    ) {
+        log.info(
+                "게시글 목록 조회 요청 boardType={}, jobPostingId={}, institutionId={}, keyword={}, page={}, size={}",
+                condition.getBoardType(),
+                condition.getJobPostingId(),
+                condition.getInstitutionId(),
+                condition.getKeyword(),
+                pageable.getPageNumber(),
+                pageable.getPageSize()
+        );
 
-        List<Post> posts =
-                postRepository.findAllByStatusOrderByCreatedAtDesc(PostStatus.ACTIVE);
+        Page<Post> posts = postRepository.searchPost(condition, pageable);
 
-        log.info("게시글 목록 조회 성공 count={}", posts.size());
+        log.info(
+                "게시글 목록 조회 성공 currentCount={}, totalCount={}, totalPages={}",
+                posts.getNumberOfElements(),
+                posts.getTotalElements(),
+                posts.getTotalPages()
+        );
 
-        return posts.stream()
-                .map(PostResponse::from)
-                .toList();
+        return posts.map(PostListResponse::from);
     }
 
     /**

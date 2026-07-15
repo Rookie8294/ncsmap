@@ -67,8 +67,7 @@ public class Post {
     @Comment("게시글 제목")
     private String title;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @Comment("게시글 내용")
     private String content;
 

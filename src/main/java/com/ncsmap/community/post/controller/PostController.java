@@ -1,19 +1,18 @@
 package com.ncsmap.community.post.controller;
 
 import com.ncsmap.common.response.ApiResponse;
-import com.ncsmap.community.post.dto.PostCreateRequest;
-import com.ncsmap.community.post.dto.PostResponse;
-import com.ncsmap.community.post.dto.PostUpdateRequest;
+import com.ncsmap.community.post.dto.*;
 import com.ncsmap.community.post.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -41,10 +40,21 @@ public class PostController {
     // 게시글 목록 조회
     @Operation(summary = "게시글 목록 조회")
     @GetMapping
-    public ResponseEntity<ApiResponse<List<PostResponse>>> getPostList() {
-        log.info("게시글 목록 조회 API 요청");
+    public ResponseEntity<ApiResponse<Page<PostListResponse>>> getPostList(
+            @ModelAttribute PostSearchCondition condition,
+            @PageableDefault(size = 20) Pageable pageable) {
+        log.info(
+                "게시글 목록 조회 API 요청 boardType={}, jobPostingId={}, institutionId={}, keyword={}, page={}, size={}",
+                condition.getBoardType(),
+                condition.getJobPostingId(),
+                condition.getInstitutionId(),
+                condition.getKeyword(),
+                pageable.getPageNumber(),
+                pageable.getPageSize()
+        );
 
-        List<PostResponse> postList = postService.getPostList();
+        Page<PostListResponse> postList =
+                postService.getPostList(condition, pageable);
 
         return ResponseEntity.ok(
                 ApiResponse.success("게시글 목록 조회 성공", postList)
