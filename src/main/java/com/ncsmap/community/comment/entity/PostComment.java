@@ -12,7 +12,13 @@ import java.time.LocalDateTime;
 
 @Getter
 @Entity
-@Table(name = "post_comment")
+@Table(
+        name = "post_comment",
+        indexes = {
+                @Index(name = "idx_post_comment_post_created", columnList = "post_id, created_at"),
+                @Index(name = "idx_post_comment_parent", columnList = "comment_parent_id")
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostComment {
 
@@ -68,11 +74,13 @@ public class PostComment {
     // 댓글 수정
     public void update(String content) {
         this.content = content;
+        this.updatedAt = LocalDateTime.now();
     }
 
     // 댓글 삭제(Soft Delete)
     public void delete() {
         this.deleted = true;
+        this.updatedAt = LocalDateTime.now();
     }
 
     // 생성일 설정

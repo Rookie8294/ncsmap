@@ -29,6 +29,7 @@ public class PostResponse {
 
     private int viewCount;
     private int likeCount;
+    private int commentCount;
 
     private PostStatus status;
 
@@ -49,6 +50,7 @@ public class PostResponse {
                 .content(post.getContent())
                 .viewCount(post.getViewCount())
                 .likeCount(post.getLikeCount())
+                .commentCount(post.getCommentCount())
                 .status(post.getStatus())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())

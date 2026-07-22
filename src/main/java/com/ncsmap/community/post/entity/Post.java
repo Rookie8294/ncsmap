@@ -8,11 +8,13 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Entity
+@DynamicUpdate
 @Table(
         name = "post",
         indexes = {
@@ -208,29 +210,6 @@ public class Post {
                     );
                 }
             }
-        }
-    }
-
-    /**
-     * 조회수를 증가시킨다.
-     */
-    public void increaseViewCount() {
-        this.viewCount++;
-    }
-
-    /**
-     * 좋아요 수를 증가시킨다.
-     */
-    public void increaseLikeCount() {
-        this.likeCount++;
-    }
-
-    /**
-     * 좋아요 수를 감소시킨다.
-     */
-    public void decreaseLikeCount() {
-        if (this.likeCount > 0) {
-            this.likeCount--;
         }
     }
 

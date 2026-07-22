@@ -21,8 +21,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Slf4j
 @Service
 @Transactional(readOnly = true)
@@ -113,9 +111,12 @@ public class PostServiceImpl implements PostService {
     public PostResponse getPost(Long postId) {
         log.info("게시글 상세 조회 요청 postId={}", postId);
 
-        Post post = getActivePost(postId);
+        int updatedRows = postRepository.incrementViewCount(postId, PostStatus.ACTIVE);
+        if (updatedRows == 0) {
+            throw new BusinessException(ErrorCode.POST_NOT_FOUND);
+        }
 
-        post.increaseViewCount();
+        Post post = getActivePost(postId);
 
         log.info(
                 "게시글 상세 조회 성공 postId={}, viewCount={}",

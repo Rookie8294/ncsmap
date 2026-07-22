@@ -1,6 +1,7 @@
 package com.ncsmap.community.comment.repository;
 
 import com.ncsmap.community.comment.entity.PostComment;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -12,5 +13,6 @@ public interface PostCommentRepository extends JpaRepository<PostComment, Long> 
     Optional<PostComment> findByIdAndDeletedFalse(Long id);
 
     // 특정 게시글의 댓글을 생성일 오름차순으로 조회
-    List<PostComment> findAllByPostIdOrderByCreatedAtAsc(Long id);
+    @EntityGraph(attributePaths = {"member", "post", "parent"})
+    List<PostComment> findAllByPostIdOrderByCreatedAtAsc(Long postId);
 }
