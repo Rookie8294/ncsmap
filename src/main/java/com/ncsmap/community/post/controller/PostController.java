@@ -4,6 +4,7 @@ import com.ncsmap.common.response.ApiResponse;
 import com.ncsmap.community.post.dto.*;
 import com.ncsmap.community.post.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Post", description = "게시글 기능 구현")
 @Slf4j
 @RestController
 @RequiredArgsConstructor

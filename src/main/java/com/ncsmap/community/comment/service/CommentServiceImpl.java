@@ -38,30 +38,74 @@ public class CommentServiceImpl implements CommentService {
      */
     @Override
     @Transactional
-    public CommentResponse createComment(Long postId, CommentCreateRequest commentCreateRequest) {
+    public CommentResponse createComment(
+            Long postId,
+            CommentCreateRequest commentCreateRequest
+    ) {
+        Long parentCommentId = commentCreateRequest.getParentCommentId();
+
+        log.info(
+                "댓글 작성 처리 시작 postId={}, parentCommentId={}",
+                postId,
+                parentCommentId
+        );
+
         Member member = getCurrentMember();
         Post post = getActivePost(postId);
-        PostComment parent = resolveParentComment(postId, commentCreateRequest.getParentCommentId());
+        PostComment parentComment = resolveParentComment(
+                postId,
+                parentCommentId
+        );
 
         PostComment comment = new PostComment(
-                member, post, parent, commentCreateRequest.getContent()
+                member,
+                post,
+                parentComment,
+                commentCreateRequest.getContent()
         );
+
         PostComment savedComment = postCommentRepository.save(comment);
-        int updatedRows = postRepository.incrementCommentCount(postId, PostStatus.ACTIVE);
-        if (updatedRows == 0) {
-            throw new BusinessException(ErrorCode.POST_NOT_FOUND);
-        }
+
+        log.debug(
+                "댓글 저장 완료 commentId={}, postId={}, memberId={}, parentCommentId={}",
+                savedComment.getId(),
+                postId,
+                member.getId(),
+                parentCommentId
+        );
+
+        incrementPostCommentCount(postId, savedComment.getId());
+
+        log.info(
+                "댓글 작성 처리 완료 commentId={}, postId={}, memberId={}, parentCommentId={}",
+                savedComment.getId(),
+                postId,
+                member.getId(),
+                parentCommentId
+        );
 
         return CommentResponse.from(savedComment);
     }
 
     @Override
     public List<CommentResponse> getComments(Long postId) {
+        log.info("댓글 목록 조회 처리 시작 postId={}", postId);
+
         getActivePost(postId);
-        return postCommentRepository.findAllByPostIdOrderByCreatedAtAsc(postId)
-                .stream()
-                .map(CommentResponse::from)
-                .toList();
+
+        List<CommentResponse> comments =
+                postCommentRepository.findAllByPostIdOrderByCreatedAtAsc(postId)
+                        .stream()
+                        .map(CommentResponse::from)
+                        .toList();
+
+        log.info(
+                "댓글 목록 조회 처리 완료 postId={}, commentCount={}",
+                postId,
+                comments.size()
+        );
+
+        return comments;
     }
 
     @Override
@@ -71,71 +115,333 @@ public class CommentServiceImpl implements CommentService {
             Long commentId,
             CommentUpdateRequest commentUpdateRequest
     ) {
+        log.info(
+                "댓글 수정 처리 시작 postId={}, commentId={}",
+                postId,
+                commentId
+        );
+
         getActivePost(postId);
+
         PostComment comment = getActiveComment(commentId);
+
         validateCommentPost(comment, postId);
         validateCommentOwner(comment);
 
         comment.update(commentUpdateRequest.getContent());
+
+        log.info(
+                "댓글 수정 처리 완료 postId={}, commentId={}, memberId={}",
+                postId,
+                commentId,
+                comment.getMember().getId()
+        );
+
         return CommentResponse.from(comment);
     }
 
     @Override
     @Transactional
     public void deleteComment(Long postId, Long commentId) {
+        log.info(
+                "댓글 삭제 처리 시작 postId={}, commentId={}",
+                postId,
+                commentId
+        );
+
         getActivePost(postId);
+
         PostComment comment = getActiveComment(commentId);
+
         validateCommentPost(comment, postId);
         validateCommentOwner(comment);
 
+        Long memberId = comment.getMember().getId();
+
         comment.delete();
-        int updatedRows = postRepository.decrementCommentCount(postId, PostStatus.ACTIVE);
-        if (updatedRows == 0) {
-            throw new BusinessException(ErrorCode.POST_NOT_FOUND);
-        }
+
+        log.debug(
+                "댓글 소프트 삭제 완료 postId={}, commentId={}, memberId={}",
+                postId,
+                commentId,
+                memberId
+        );
+
+        decrementPostCommentCount(postId, commentId);
+
+        log.info(
+                "댓글 삭제 처리 완료 postId={}, commentId={}, memberId={}",
+                postId,
+                commentId,
+                memberId
+        );
     }
 
     private Member getCurrentMember() {
         Long memberId = SecurityUtil.getCurrentMemberId();
+
+        log.debug("현재 로그인 회원 조회 시작 memberId={}", memberId);
+
         return memberRepository.findByIdAndDeletedFalse(memberId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+                .map(member -> {
+                    log.debug(
+                            "현재 로그인 회원 조회 완료 memberId={}",
+                            member.getId()
+                    );
+
+                    return member;
+                })
+                .orElseThrow(() -> {
+                    log.warn(
+                            "현재 로그인 회원을 찾을 수 없음 memberId={}",
+                            memberId
+                    );
+
+                    return new BusinessException(
+                            ErrorCode.MEMBER_NOT_FOUND
+                    );
+                });
     }
 
     private Post getActivePost(Long postId) {
-        return postRepository.findByIdAndStatus(postId, PostStatus.ACTIVE)
-                .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
+        log.debug(
+                "활성 게시글 조회 시작 postId={}, status={}",
+                postId,
+                PostStatus.ACTIVE
+        );
+
+        return postRepository.findByIdAndStatus(
+                        postId,
+                        PostStatus.ACTIVE
+                )
+                .map(post -> {
+                    log.debug(
+                            "활성 게시글 조회 완료 postId={}, status={}, commentCount={}",
+                            post.getId(),
+                            post.getStatus(),
+                            post.getCommentCount()
+                    );
+
+                    return post;
+                })
+                .orElseThrow(() -> {
+                    log.warn(
+                            "활성 게시글을 찾을 수 없음 postId={}, status={}",
+                            postId,
+                            PostStatus.ACTIVE
+                    );
+
+                    return new BusinessException(
+                            ErrorCode.POST_NOT_FOUND
+                    );
+                });
     }
 
     private PostComment getActiveComment(Long commentId) {
+        log.debug(
+                "활성 댓글 조회 시작 commentId={}",
+                commentId
+        );
+
         return postCommentRepository.findByIdAndDeletedFalse(commentId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
+                .map(comment -> {
+                    log.debug(
+                            "활성 댓글 조회 완료 commentId={}, postId={}, memberId={}",
+                            comment.getId(),
+                            comment.getPost().getId(),
+                            comment.getMember().getId()
+                    );
+
+                    return comment;
+                })
+                .orElseThrow(() -> {
+                    log.warn(
+                            "활성 댓글을 찾을 수 없음 commentId={}",
+                            commentId
+                    );
+
+                    return new BusinessException(
+                            ErrorCode.COMMENT_NOT_FOUND
+                    );
+                });
     }
 
-    private void validateCommentPost(PostComment comment, Long postId) {
-        if (!comment.getPost().getId().equals(postId)) {
-            throw new BusinessException(ErrorCode.COMMENT_NOT_FOUND);
+    private void validateCommentPost(
+            PostComment comment,
+            Long postId
+    ) {
+        Long actualPostId = comment.getPost().getId();
+
+        if (!actualPostId.equals(postId)) {
+            log.warn(
+                    "댓글 게시글 불일치 commentId={}, requestedPostId={}, actualPostId={}",
+                    comment.getId(),
+                    postId,
+                    actualPostId
+            );
+
+            throw new BusinessException(
+                    ErrorCode.COMMENT_NOT_FOUND
+            );
         }
+
+        log.debug(
+                "댓글 게시글 관계 검증 완료 commentId={}, postId={}",
+                comment.getId(),
+                postId
+        );
     }
 
     private void validateCommentOwner(PostComment comment) {
-        Long memberId = SecurityUtil.getCurrentMemberId();
-        if (!comment.getMember().getId().equals(memberId)) {
-            throw new BusinessException(ErrorCode.COMMENT_ACCESS_DENIED);
+        Long currentMemberId = SecurityUtil.getCurrentMemberId();
+        Long commentOwnerId = comment.getMember().getId();
+
+        if (!commentOwnerId.equals(currentMemberId)) {
+            log.warn(
+                    "댓글 접근 권한 없음 commentId={}, ownerId={}, requestMemberId={}",
+                    comment.getId(),
+                    commentOwnerId,
+                    currentMemberId
+            );
+
+            throw new BusinessException(
+                    ErrorCode.COMMENT_ACCESS_DENIED
+            );
         }
+
+        log.debug(
+                "댓글 작성자 검증 완료 commentId={}, memberId={}",
+                comment.getId(),
+                currentMemberId
+        );
     }
 
-    private PostComment resolveParentComment(Long postId, Long parentCommentId) {
+    private PostComment resolveParentComment(
+            Long postId,
+            Long parentCommentId
+    ) {
         if (parentCommentId == null) {
+            log.debug(
+                    "일반 댓글 작성 요청 postId={}",
+                    postId
+            );
+
             return null;
         }
 
-        PostComment parent = postCommentRepository.findByIdAndDeletedFalse(parentCommentId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
+        log.debug(
+                "부모 댓글 조회 시작 postId={}, parentCommentId={}",
+                postId,
+                parentCommentId
+        );
 
-        if (!parent.getPost().getId().equals(postId)) {
-            throw new BusinessException(ErrorCode.INVALID_COMMENT_PARENT);
+        PostComment parentComment =
+                postCommentRepository.findByIdAndDeletedFalse(parentCommentId)
+                        .orElseThrow(() -> {
+                            log.warn(
+                                    "부모 댓글을 찾을 수 없음 postId={}, parentCommentId={}",
+                                    postId,
+                                    parentCommentId
+                            );
+
+                            return new BusinessException(
+                                    ErrorCode.COMMENT_NOT_FOUND
+                            );
+                        });
+
+        Long parentPostId = parentComment.getPost().getId();
+
+        if (!parentPostId.equals(postId)) {
+            log.warn(
+                    "부모 댓글 게시글 불일치 parentCommentId={}, requestedPostId={}, actualPostId={}",
+                    parentCommentId,
+                    postId,
+                    parentPostId
+            );
+
+            throw new BusinessException(
+                    ErrorCode.INVALID_COMMENT_PARENT
+            );
         }
 
-        return parent;
+        log.debug(
+                "부모 댓글 검증 완료 postId={}, parentCommentId={}",
+                postId,
+                parentCommentId
+        );
+
+        return parentComment;
+    }
+
+    private void incrementPostCommentCount(
+            Long postId,
+            Long commentId
+    ) {
+        log.debug(
+                "게시글 댓글 수 증가 시도 postId={}, commentId={}",
+                postId,
+                commentId
+        );
+
+        int updatedRows = postRepository.incrementCommentCount(
+                postId,
+                PostStatus.ACTIVE
+        );
+
+        if (updatedRows == 0) {
+            log.warn(
+                    "게시글 댓글 수 증가 실패 - 활성 게시글 없음 postId={}, commentId={}, status={}",
+                    postId,
+                    commentId,
+                    PostStatus.ACTIVE
+            );
+
+            throw new BusinessException(
+                    ErrorCode.POST_NOT_FOUND
+            );
+        }
+
+        log.debug(
+                "게시글 댓글 수 증가 완료 postId={}, commentId={}, updatedRows={}",
+                postId,
+                commentId,
+                updatedRows
+        );
+    }
+
+    private void decrementPostCommentCount(
+            Long postId,
+            Long commentId
+    ) {
+        log.debug(
+                "게시글 댓글 수 감소 시도 postId={}, commentId={}",
+                postId,
+                commentId
+        );
+
+        int updatedRows = postRepository.decrementCommentCount(
+                postId,
+                PostStatus.ACTIVE
+        );
+
+        if (updatedRows == 0) {
+            log.warn(
+                    "게시글 댓글 수 감소 실패 - 활성 게시글 없음 postId={}, commentId={}, status={}",
+                    postId,
+                    commentId,
+                    PostStatus.ACTIVE
+            );
+
+            throw new BusinessException(
+                    ErrorCode.POST_NOT_FOUND
+            );
+        }
+
+        log.debug(
+                "게시글 댓글 수 감소 완료 postId={}, commentId={}, updatedRows={}",
+                postId,
+                commentId,
+                updatedRows
+        );
     }
 }

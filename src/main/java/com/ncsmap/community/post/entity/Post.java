@@ -214,6 +214,36 @@ public class Post {
     }
 
     /**
+     * 조회수를 증가시킨다.
+     */
+    public void increaseViewCount() {
+        this.viewCount++;
+    }
+
+    /**
+     * 좋아요 수를 증가시킨다.
+     */
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    /**
+     * 좋아요 수를 감소시킨다.
+     */
+    public void decreaseLikeCount() {
+        if (this.likeCount > 0) {
+            this.likeCount--;
+        }
+    }
+
+    /**
+     * 댓글 수를 증가시킨다.
+     */
+    public void increaseCommentCount() {
+        this.commentCount++;
+    }
+
+    /**
      * 게시글을 삭제 상태로 변경한다.
      */
     public void delete() {
