@@ -8,11 +8,13 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Entity
+@DynamicUpdate
 @Table(
         name = "post",
         indexes = {
@@ -79,6 +81,10 @@ public class Post {
     @Comment("좋아요 수")
     private int likeCount;
 
+    @Column(name = "comment_count", nullable = false)
+    @Comment("댓글 수")
+    private int commentCount;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     @Comment("게시글 상태")
@@ -110,6 +116,7 @@ public class Post {
         this.content = content;
         this.viewCount = 0;
         this.likeCount = 0;
+        this.commentCount = 0;
         this.status = PostStatus.ACTIVE;
         this.createdAt = LocalDateTime.now();
     }
@@ -227,6 +234,13 @@ public class Post {
         if (this.likeCount > 0) {
             this.likeCount--;
         }
+    }
+
+    /**
+     * 댓글 수를 증가시킨다.
+     */
+    public void increaseCommentCount() {
+        this.commentCount++;
     }
 
     /**
