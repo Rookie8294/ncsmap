@@ -62,4 +62,15 @@ public class Institution extends BaseEntity {
         this.naraCode = naraCode;
     }
 
+    public void update(
+            String name, String type, String ministry,
+            String roadAddress, String siteUrl
+    ) {
+        this.name = name;
+        this.type = type;
+        this.ministry = ministry;
+        this.roadAddress = roadAddress;
+        this.siteUrl = siteUrl;
+    }
+
 }

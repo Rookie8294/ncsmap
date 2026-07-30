@@ -5,6 +5,7 @@ import com.ncsmap.common.exception.BusinessException;
 import com.ncsmap.common.exception.ErrorCode;
 import com.ncsmap.common.file.FileStorageService;
 import com.ncsmap.common.file.LocalFileStorageService;
+import com.ncsmap.common.util.SecurityUtil;
 import com.ncsmap.member.dto.MemberDetailResponse;
 import com.ncsmap.member.dto.MemberResponse;
 import com.ncsmap.member.dto.MemberUpdateRequest;
@@ -108,20 +109,17 @@ public class MemberServiceImpl implements MemberService {
     }
 
     private Member getCurrentMember(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long memberId = SecurityUtil.getCurrentMemberId();
 
-        if(authentication == null
-                || !authentication.isAuthenticated()
-                || authentication.getPrincipal().equals("anonymousUser")){
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> {
+                    log.warn(
+                            "현재 회원 조회 실패 reason=회원 정보 없음, memberId={}",
+                            memberId
+                    );
 
-            log.warn("현재 회원 조회 실패 reason = 인증 정보 없음");
-            throw new BusinessException(ErrorCode.LOGIN_REQUIRED);
-        }
-
-        LoginUser loginUser = (LoginUser) authentication.getPrincipal();
-
-        return  memberRepository.findById(loginUser.getMemberId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+                    return new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
+                });
     }
 
     private void validateUpdateRequest(MemberUpdateRequest request) {
