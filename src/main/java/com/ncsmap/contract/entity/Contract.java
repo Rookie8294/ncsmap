@@ -3,7 +3,6 @@ package com.ncsmap.contract.entity;
 import com.ncsmap.agency.entity.Agency;
 import com.ncsmap.common.BaseEntity;
 import com.ncsmap.institution.entity.Institution;
-import com.ncsmap.jobposting.entity.JobPosting;
 import jakarta.persistence.*;
 import lombok.*;
 

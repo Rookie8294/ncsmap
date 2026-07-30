@@ -2,7 +2,6 @@ package com.ncsmap.jobposting.controller;
 
 import com.ncsmap.jobposting.dto.JobPostingWithContractsResponse;
 import com.ncsmap.jobposting.service.JobPostingMappingService;
-import com.ncsmap.jobposting.service.JobPostingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
