@@ -1,6 +1,7 @@
 package com.ncsmap.jobposting.entity;
 
 import com.ncsmap.common.BaseEntity;
+import com.ncsmap.contract.entity.Contract;
 import com.ncsmap.institution.entity.Institution;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,6 +23,10 @@ public class JobPosting extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "institution_id", nullable = false)
     private Institution  institution;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contract_id")
+    private Contract contract;
 
     @Comment("공고 고유번호")
     @Column(nullable = false, length = 100)
@@ -100,6 +105,7 @@ public class JobPosting extends BaseEntity {
     @Column(length = 500)
     private String preferCondition;
 
+
     public void update(String title, String hireType, String recruitType,
                        String eduReq, String workRegion, Integer recruitCount,
                        LocalDate startDate, LocalDate endDate,
@@ -127,4 +133,7 @@ public class JobPosting extends BaseEntity {
         this.preferCondition = preferCondition;
     }
 
+    public void updateContract(Contract contract) {
+        this.contract = contract;
+    }
 }

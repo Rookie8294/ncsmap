@@ -2,6 +2,8 @@ package com.ncsmap.institution.repository;
 
 import com.ncsmap.institution.entity.Institution;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -9,5 +11,9 @@ import java.util.Optional;
 @Repository
 public interface InstitutionRepository extends JpaRepository<Institution, Long> {
     Optional<Institution> findByCode(String code);
+
+    Optional<Institution> findByNaraCode(String naraCode);
+
+    Optional<Institution> findByName(String name);
 }
 
