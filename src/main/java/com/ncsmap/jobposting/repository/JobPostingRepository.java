@@ -7,9 +7,10 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface JobPostingRepository
-        extends JpaRepository<JobPosting, Long>,
-        JobPostingRepositoryCustom {
+public interface JobPostingRepository extends JpaRepository<JobPosting, Long>, JobPostingRepositoryCustom {
 
     Optional<JobPosting> findBySourcePostingId(String sourcePostingId);
+
+
+
 }

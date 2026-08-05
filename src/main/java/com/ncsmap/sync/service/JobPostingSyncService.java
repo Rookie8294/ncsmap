@@ -29,6 +29,11 @@ public class JobPostingSyncService {
     private static final int PAGE_NO = 1;
     private static final DateTimeFormatter DATE_FORMATTER =DateTimeFormatter.ofPattern("yyyyMMdd");
 
+    private static final List<String> NCS_KEYWORDS = List.of(
+            "필기"
+            //,"NCS"
+    );
+
     @Transactional
     public void sync(JobPostingSyncCondition condition) {
         log.info("채용공고 동기화 시작");
@@ -125,8 +130,7 @@ public class JobPostingSyncService {
                             .recruitCount(dto.getRecruitCount())
                             .startDate(parseDate(dto.getStartDate()))
                             .endDate(parseDate(dto.getEndDate()))
-                            // ncsYn ncs시험여부 수정 필요
-                            .ncsYn(hasNcs(dto.getNcsCodes()))
+                            .ncsYn(isNcs(dto.getProcessDesc()))
                             .ncsCodes(dto.getNcsCodes())
                             .ncsCodeNames(dto.getNcsCodeNames())
                             .status(parseStatus(dto.getOngoingYn()))
@@ -151,7 +155,7 @@ public class JobPostingSyncService {
                     dto.getRecruitCount(),
                     parseDate(dto.getStartDate()),
                     parseDate(dto.getEndDate()),
-                    hasNcs(dto.getNcsCodes()),
+                    isNcs(dto.getProcessDesc()),
                     dto.getNcsCodes(),
                     dto.getNcsCodeNames(),
                     parseStatus(dto.getOngoingYn()),
@@ -182,8 +186,12 @@ public class JobPostingSyncService {
         return "마감"; // null이면 마감
     }
 
-    private Boolean hasNcs(String ncsCodes) {
-        return ncsCodes != null && !ncsCodes.isBlank();
+    private Boolean isNcs(String processDesc) {
+        if ( processDesc == null ) return false;
+        String normalized = processDesc.replace("\\s", "").toUpperCase();
+        return NCS_KEYWORDS
+                .stream()
+                .anyMatch(key -> normalized.contains(key.toUpperCase()));
     }
 
 }

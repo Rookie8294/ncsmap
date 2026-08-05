@@ -1,9 +1,14 @@
 package com.ncsmap.jobposting.repository;
 
+import com.ncsmap.agency.entity.QAgency;
+import com.ncsmap.contract.entity.QContract;
+import com.ncsmap.institution.entity.QInstitution;
 import com.ncsmap.jobposting.dto.JobPostingSearchRequest;
+import com.ncsmap.jobposting.dto.UnmappedJobPostingProjection;
 import com.ncsmap.jobposting.entity.JobPosting;
 import com.ncsmap.jobposting.entity.QJobPosting;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +21,49 @@ import java.util.List;
 public class JobPostingRepositoryImpl implements JobPostingRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+
+
+    @Override
+    public List<UnmappedJobPostingProjection> findUnmappedJobPostings() {
+
+        QJobPosting jp = QJobPosting.jobPosting;
+        QInstitution i = QInstitution.institution;
+        QContract c = QContract.contract;
+        QAgency a = QAgency.agency;
+
+        return queryFactory
+                .select(Projections.constructor(UnmappedJobPostingProjection.class,
+                        jp.id,
+                        jp.title,
+                        jp.hireType,
+                        jp.recruitType,
+                        jp.startDate,
+                        jp.endDate,
+                        jp.status,
+                        jp.sourceUrl,
+                        jp.processDesc,
+                        i.name,
+                        i.siteUrl,
+                        c.id,
+                        c.title,
+                        c.contractDate,
+                        c.totalContractAmount,
+                        c.businessType,
+                        c.contractMethod,
+                        c.contractInfoUrl,
+                        c.institutionCode,
+                        a.agencyName ))
+                .from(jp)
+                .join(jp.institution, i)
+                .join(c).on(c.institution.eq(i))
+                .join(c.agency, a)
+                .where(
+                        jp.ncsYn.isTrue(),
+                        jp.contract.isNull()
+                )
+                .orderBy(jp.id.asc())
+                .fetch();
+    }
 
     @Override
     public Page<JobPosting> search(JobPostingSearchRequest request, Pageable pageable) {

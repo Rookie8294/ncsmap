@@ -41,6 +41,26 @@ public class Institution extends BaseEntity {
     @Column(length = 300)
     private String siteUrl;
 
+    @Comment("나라장터 수요기관 코드")
+    @Column(length = 100)
+    private String naraCode;
+
+
+    public void update(
+            String name, String type, String ministry,
+            String roadAddress, String siteUrl
+    ) {
+        this.name = name;
+        this.type = type;
+        this.ministry = ministry;
+        this.roadAddress = roadAddress;
+        this.siteUrl = siteUrl;
+    }
+
+    //나라장터 수요기관 코드 업데이트
+    public void updateNaraCode(String naraCode) {
+        this.naraCode = naraCode;
+    }
 
     public void update(
             String name, String type, String ministry,

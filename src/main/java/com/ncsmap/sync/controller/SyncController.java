@@ -1,5 +1,6 @@
 package com.ncsmap.sync.controller;
 import com.ncsmap.sync.dto.JobPostingSyncCondition;
+import com.ncsmap.sync.service.ContractSyncService;
 import com.ncsmap.sync.service.InstitutionSyncService;
 import com.ncsmap.sync.service.JobPostingSyncService;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/api/admin/sync")
@@ -16,7 +18,8 @@ public class SyncController {
 
     private final InstitutionSyncService institutionSyncService;
     private final JobPostingSyncService jobPostingSyncService;
-    
+    private final ContractSyncService contractSyncService;
+
     @PostMapping("/institutions")
     public ResponseEntity<String> syncInstitutions() {
         institutionSyncService.sync();
@@ -34,5 +37,14 @@ public class SyncController {
         jobPostingSyncService.sync(condition);
 
         return ResponseEntity.ok("채용공고 동기화 완료");
+    }
+
+    @PostMapping("/contracts")
+    public ResponseEntity<String> syncContracts(
+            @RequestParam String startDate,
+            @RequestParam String endDate
+    ){
+        contractSyncService.sync(startDate, endDate);
+        return ResponseEntity.ok("계약정보 동기화 완료");
     }
 }
